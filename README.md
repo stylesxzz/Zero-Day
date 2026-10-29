@@ -24,9 +24,6 @@ Você administra uma torre futurista do subsolo ao 10º andar. O edifício abrig
   <img src="assets/images/gameplay-overview.jpg" alt="Demonstração conceitual de gameplay e interface" width="100%" />
 </p>
 
-<p align="center">
-  <img src="assets/images/concept-board.jpg" alt="Painel visual de andares e mecânicas" width="100%" />
-</p>
 
 > **Aviso:** o protótipo usa uma economia fictícia e preços gerados localmente. Não opera em corretoras, não acessa carteiras e não movimenta dinheiro real.
 
