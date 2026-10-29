@@ -35,6 +35,13 @@ class SimulationTests(unittest.TestCase):
         engine.set_risk("agressivo")
         self.assertTrue(all(bot.risk_name == "agressivo" for bot in engine.alive_robots))
 
+    def test_add_robot_funds_new_agent_without_creating_balance(self):
+        engine = SimulationEngine(1000.0, 1, seed=4)
+        before = engine.total_balance()
+        self.assertTrue(engine.add_robot(100.0))
+        self.assertEqual(len(engine.alive_robots), 2)
+        self.assertAlmostEqual(engine.total_balance(), before, places=6)
+
     def test_dead_robot_is_not_counted_as_alive(self):
         engine = SimulationEngine(1000.0, 1, seed=2)
         robot = engine.alive_robots[0]
