@@ -33,7 +33,7 @@ def init_db() -> None:
         db.executescript("""
         CREATE TABLE IF NOT EXISTS agents (
           id TEXT PRIMARY KEY, name TEXT NOT NULL, strategy TEXT NOT NULL DEFAULT 'trend',
-          model TEXT NOT NULL DEFAULT '', risk_profile TEXT NOT NULL DEFAULT 'conservative',
+          model TEXT NOT NULL DEFAULT '', provider_id TEXT NOT NULL DEFAULT 'default', risk_profile TEXT NOT NULL DEFAULT 'conservative',
           allocation REAL NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'idle',
           created_at TEXT NOT NULL
         );
@@ -55,6 +55,9 @@ def init_db() -> None:
           enabled INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
         );
         """)
+        columns = {row["name"] for row in db.execute("PRAGMA table_info(agents)").fetchall()}
+        if "provider_id" not in columns:
+            db.execute("ALTER TABLE agents ADD COLUMN provider_id TEXT NOT NULL DEFAULT 'default'")
         db.commit()
 
 def now() -> str:
@@ -73,9 +76,9 @@ def list_events(limit: int = 50) -> list[dict[str, Any]]:
 
 def create_agent(agent: dict[str, Any]) -> dict[str, Any]:
     with _lock, _connect() as db:
-        db.execute("""INSERT INTO agents(id,name,strategy,model,risk_profile,allocation,status,created_at)
-          VALUES(?,?,?,?,?,?,?,?)""",
-          (agent["id"],agent["name"],agent.get("strategy","trend"),agent.get("model",""),
+        db.execute("""INSERT INTO agents(id,name,strategy,model,provider_id,risk_profile,allocation,status,created_at)
+          VALUES(?,?,?,?,?,?,?,?,?)""",
+          (agent["id"],agent["name"],agent.get("strategy","trend"),agent.get("model",""),agent.get("provider_id","default"),
            agent.get("risk_profile","conservative"),agent.get("allocation",0),"idle",now()))
         db.commit()
     event("agent", f"Agente {agent['name']} registrado.", {"agent_id":agent["id"]})
