@@ -5,6 +5,9 @@ import re
 import uuid
 from contextlib import asynccontextmanager
 from typing import Literal
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
