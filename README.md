@@ -145,15 +145,21 @@ python -m unittest discover -s tests -v
 Zero-Day/
 ├── main.py
 ├── zeroday/
+│   ├── backend/        # FastAPI, SQLite, dados reais e carteiras read-only
+│   ├── providers/      # adaptador OpenAI-compatible
+│   ├── execution/      # risco e executor fail-closed (ordens bloqueadas)
+│   ├── web/            # painel cyberpunk responsivo ligado à API
 │   ├── config.py       # parâmetros, risco e andares
 │   ├── models.py       # entidades e estados
-│   ├── market.py       # mercado sintético e indicadores
-│   ├── trading.py      # decisão autônoma dos agentes
-│   ├── simulation.py   # economia e ciclo de vida
+│   ├── market.py       # mercado sintético para desenvolvimento
+│   ├── trading.py      # estratégia do protótipo
+│   ├── simulation.py   # ciclo de vida do protótipo
 │   └── ui.py           # interface Pygame 2D
 ├── docs/
 ├── tests/
 ├── assets/images/
+├── Dockerfile
+├── compose.yaml
 ├── requirements.txt
 └── LICENSE
 ```
