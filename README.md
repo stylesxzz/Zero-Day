@@ -6,26 +6,26 @@
 
 <p align="center">
   <strong>Construa. Gerencie. Multiplique.</strong><br/>
-  Simulador 2D de gerenciamento de base e agentes autônomos de trading em um arranha-céu cyberpunk.
+  Plataforma cyberpunk de gerenciamento de agentes autônomos de trading, com cliente 2D e conectores financeiros/IA.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10+" />
   <img src="https://img.shields.io/badge/Pygame-2D%20Prototype-00E991" alt="Pygame 2D" />
-  <img src="https://img.shields.io/badge/Market-100%25%20Simulated-00C7D9" alt="Mercado simulado" />
+  <img src="https://img.shields.io/badge/Trading-Live%20Adapter%20Guarded-00C7D9" alt="Adaptador de trading com execução protegida" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License" />
 </p>
 
 ## Visão geral
 
-Você administra uma torre futurista do subsolo ao 10º andar. O edifício abriga agentes robóticos independentes: cada um recebe parte do capital fictício, interpreta o mercado simulado, escolhe entre comprar, vender ou esperar e tenta evoluir.
+Você administra uma torre futurista do subsolo ao 10º andar. Os agentes podem analisar dados de mercado com modelos configuráveis e propor operações sobre uma conta cripto dedicada. O motor financeiro precisa validar cada proposta antes de qualquer ordem. O mercado sintético existente permanece disponível apenas como ambiente de desenvolvimento.
 
 <p align="center">
   <img src="assets/images/gameplay-overview.svg" alt="Demonstração conceitual de gameplay e interface" width="100%" />
 </p>
 
 
-> **Aviso:** o protótipo usa uma economia fictícia e preços gerados localmente. Não opera em corretoras, não acessa carteiras e não movimenta dinheiro real.
+> **Status financeiro:** o repositório inclui adaptadores iniciais para modelos OpenAI-compatible e exchanges via CCXT. Eles não criam uma carteira e não estão prontos para produção. Ordens reais ficam bloqueadas por padrão; nunca use chaves com permissão de saque.
 
 ## Funcionalidades implementadas
 
@@ -159,6 +159,16 @@ Zero-Day/
 ```
 
 O núcleo foi isolado do Pygame para permitir uma futura migração visual para Godot 2D ou cliente Web sem reescrever as regras. Veja [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Integração financeira e de IA
+
+- [Arquitetura de trading real](docs/REAL_TRADING_ARCHITECTURE.md).
+- [Exemplo de configuração](.env.example).
+- [Adaptador de IA configurável](zeroday/providers/llm.py).
+- [Adaptador spot CCXT com bloqueio de ordens por padrão](zeroday/execution/exchange.py).
+- [Validações iniciais de risco](zeroday/execution/risk.py).
+
+O adaptador de IA aceita serviços compatíveis com OpenAI Chat Completions. APIs proprietárias precisam de adaptadores próprios; não existe compatibilidade universal automática com literalmente qualquer API.
 
 ## Próximas versões
 
