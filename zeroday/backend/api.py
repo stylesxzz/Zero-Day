@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from . import store
 from .market_data import ticker
-from .service import analyze_agent
+from .service import analyze_agent, provider_registry
 from .wallets import exchange_balance, evm_native_balance
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ class AgentCreate(BaseModel):
     name: str = Field(min_length=2, max_length=60)
     strategy: Literal["trend","mean_reversion","momentum","research"] = "trend"
     model: str = Field(default="", max_length=120)
+    provider_id: str = Field(default="default", min_length=1, max_length=80, pattern=r"^[a-zA-Z0-9_-]+$")
     risk_profile: Literal["conservative","moderate","aggressive"] = "conservative"
     allocation: float = Field(default=0, ge=0, le=1_000_000)
 
@@ -106,12 +107,11 @@ def wallet_onchain(body: OnchainRequest):
 
 @app.get("/api/providers")
 def providers():
-    # Never return API keys. Values are names of environment variables only.
-    return {"configured":bool(os.getenv("ZERO_DAY_AI_BASE_URL") and os.getenv("ZERO_DAY_AI_API_KEY") and os.getenv("ZERO_DAY_AI_MODEL")),
-            "base_url":os.getenv("ZERO_DAY_AI_BASE_URL",""),
-            "model":os.getenv("ZERO_DAY_AI_MODEL",""),
-            "api_key_env":"ZERO_DAY_AI_API_KEY" if os.getenv("ZERO_DAY_AI_API_KEY") else "",
-            "compatible_protocol":"OpenAI Chat Completions"}
+    # Never return API keys. Profiles expose only the env-var name holding each secret.
+    try:
+        return {"providers":provider_registry(),"compatible_protocol":"OpenAI Chat Completions"}
+    except RuntimeError as exc:
+        raise HTTPException(500, str(exc)) from exc
 
 @app.post("/api/orders/execute", status_code=423)
 def execute_order_blocked():
