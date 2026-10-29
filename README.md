@@ -1,7 +1,7 @@
 # ZÉRO DAY: SWARM TRADING
 
 <p align="center">
-  <img src="assets/images/title-art.jpg" alt="Zéro Day — arte de capa" width="100%" />
+  <img src="assets/images/title-art.svg" alt="Zéro Day — arte de capa" width="100%" />
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
 Você administra uma torre futurista do subsolo ao 10º andar. O edifício abriga agentes robóticos independentes: cada um recebe parte do capital fictício, interpreta o mercado simulado, escolhe entre comprar, vender ou esperar e tenta evoluir.
 
 <p align="center">
-  <img src="assets/images/gameplay-overview.jpg" alt="Demonstração conceitual de gameplay e interface" width="100%" />
+  <img src="assets/images/gameplay-overview.svg" alt="Demonstração conceitual de gameplay e interface" width="100%" />
 </p>
 
 
