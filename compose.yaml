@@ -1,0 +1,14 @@
+services:
+  zeroday:
+    build: .
+    container_name: zeroday-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      # Bind to loopback only; add an authenticated reverse proxy before remote access.
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - zeroday-data:/app/data
+volumes:
+  zeroday-data:
