@@ -10,13 +10,49 @@ from .market_data import ticker
 
 SYSTEM_PROMPT = """You are a cautious crypto market research agent. Return ONLY a JSON object with keys action, confidence, rationale. action must be BUY, SELL, or HOLD. confidence must be a number from 0 to 1. rationale must be a short string. Do not request credentials or claim to execute trades. Prefer HOLD when data is insufficient. This is research only; every proposal requires separate deterministic validation."""
 
+def provider_registry() -> list[dict[str, Any]]:
+    """Return sanitized provider profiles; secrets are referenced by env var name only."""
+    raw = os.getenv("ZERO_DAY_AI_PROVIDERS_JSON", "").strip()
+    profiles: list[dict[str, Any]] = []
+    if raw:
+        try:
+            parsed = json.loads(raw)
+            if not isinstance(parsed, list): raise ValueError("Provider config must be a JSON list.")
+            for item in parsed:
+                if not isinstance(item, dict): continue
+                profile = {
+                    "id": str(item.get("id", "")).strip(),
+                    "name": str(item.get("name", item.get("id", ""))).strip(),
+                    "base_url": str(item.get("base_url", "")).strip(),
+                    "model": str(item.get("model", "")).strip(),
+                    "api_key_env": str(item.get("api_key_env", "")).strip(),
+                }
+                if profile["id"] and profile["base_url"] and profile["model"] and profile["api_key_env"]:
+                    profile["configured"] = bool(os.getenv(profile["api_key_env"], "").strip())
+                    profiles.append(profile)
+        except (json.JSONDecodeError, ValueError):
+            raise RuntimeError("ZERO_DAY_AI_PROVIDERS_JSON must be a valid JSON list of provider profiles.")
+    if not profiles:
+        base = os.getenv("ZERO_DAY_AI_BASE_URL", "").strip()
+        model = os.getenv("ZERO_DAY_AI_MODEL", "").strip()
+        key_env = "ZERO_DAY_AI_API_KEY"
+        if base and model:
+            profiles.append({"id":"default","name":"Default OpenAI-compatible","base_url":base,
+                             "model":model,"api_key_env":key_env,
+                             "configured":bool(os.getenv(key_env,"").strip())})
+    return profiles
+
 def _model_for_agent(agent: dict[str, Any]) -> OpenAICompatibleModel:
-    base = os.getenv("ZERO_DAY_AI_BASE_URL","").strip()
-    key = os.getenv("ZERO_DAY_AI_API_KEY","").strip()
-    model = agent.get("model") or os.getenv("ZERO_DAY_AI_MODEL","").strip()
-    if not (base and key and model):
-        raise RuntimeError("Configure ZERO_DAY_AI_BASE_URL, ZERO_DAY_AI_API_KEY and ZERO_DAY_AI_MODEL in local .env.")
-    return OpenAICompatibleModel(ModelConfig(base, key, model))
+    profiles = provider_registry()
+    provider_id = agent.get("provider_id") or "default"
+    profile = next((p for p in profiles if p["id"] == provider_id), None)
+    if profile is None:
+        raise RuntimeError(f"Provider '{provider_id}' is not configured.")
+    key = os.getenv(profile["api_key_env"], "").strip()
+    model = agent.get("model") or profile["model"]
+    if not (profile["base_url"] and key and model):
+        raise RuntimeError("Configure the selected provider URL, model and API key environment variable in local .env.")
+    return OpenAICompatibleModel(ModelConfig(profile["base_url"], key, model))
 
 def analyze_agent(agent_id: str, exchange_id: str, symbol: str) -> dict[str, Any]:
     agent = store.get_agent(agent_id)
