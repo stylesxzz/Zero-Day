@@ -4,6 +4,7 @@ import json
 import os
 import uuid
 from typing import Any
+from urllib.parse import urlsplit
 from zeroday.providers.llm import ModelConfig, OpenAICompatibleModel
 from . import store
 from .market_data import ticker
@@ -28,6 +29,10 @@ def provider_registry() -> list[dict[str, Any]]:
                     "api_key_env": str(item.get("api_key_env", "")).strip(),
                 }
                 if profile["id"] and profile["base_url"] and profile["model"] and profile["api_key_env"]:
+                    parsed_url = urlsplit(profile["base_url"])
+                    if (parsed_url.scheme not in {"https", "http"} or not parsed_url.hostname
+                            or parsed_url.username or parsed_url.password or parsed_url.query or parsed_url.fragment):
+                        raise ValueError("Provider base_url must be an HTTP(S) URL without embedded credentials, query or fragment.")
                     profile["configured"] = bool(os.getenv(profile["api_key_env"], "").strip())
                     profiles.append(profile)
         except (json.JSONDecodeError, ValueError):
@@ -37,6 +42,10 @@ def provider_registry() -> list[dict[str, Any]]:
         model = os.getenv("ZERO_DAY_AI_MODEL", "").strip()
         key_env = "ZERO_DAY_AI_API_KEY"
         if base and model:
+            parsed_url = urlsplit(base)
+            if (parsed_url.scheme not in {"https", "http"} or not parsed_url.hostname
+                    or parsed_url.username or parsed_url.password or parsed_url.query or parsed_url.fragment):
+                raise RuntimeError("ZERO_DAY_AI_BASE_URL must be an HTTP(S) URL without embedded credentials, query or fragment.")
             profiles.append({"id":"default","name":"Default OpenAI-compatible","base_url":base,
                              "model":model,"api_key_env":key_env,
                              "configured":bool(os.getenv(key_env,"").strip())})
